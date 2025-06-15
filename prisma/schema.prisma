@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // or "mysql", "sqlite"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model QuestionPaper {
+  id          String   @id @default(cuid())
+  year        Int
+  semester    Int
+  branch      Branch
+  questionType QuestionType
+  title       String
+  fileName    String
+  fileUrl     String
+  cloudinaryId String
+  uploadedAt  DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("question_papers")
+}
+
+enum Branch {
+  CSE
+  IT
+  ECE
+  EE
+  ME
+  CE
+}
+
+enum QuestionType {
+  INTERNAL
+  SEMESTER
+}
