@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { LogOut, FileText } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { toast } from 'sonner';
+import logo from '@/public/jgec.png';
+import { useAuth } from '@/hooks/useAuth';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -12,38 +14,18 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
+  const { isAuthenticated, isLoading, logout } = useAuth();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await fetch('/api/auth', {
-          method: 'GET',
-        });
-        
-        if (!response.ok) {
-          router.push('/admin/login');
-          return;
-        }
-        
-        // If we reach here, user is authenticated
-        setIsLoading(false);
-      } catch (error) {
-        console.log('Error checking authentication:', error);
-        router.push('/admin/login');
-        return;
-      }
-    };
-
-    checkAuth();
-  }, [router]);
+    // Only redirect if not loading and not authenticated
+    if (!isLoading && !isAuthenticated) {
+      router.push('/admin/login');
+    }
+  }, [isAuthenticated, isLoading, router]);
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/auth', {
-        method: 'DELETE',
-      });
-      
+      await logout();
       toast("Logged out successfully");
       router.push('/admin/login');
     } catch (error) {
@@ -52,6 +34,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     }
   };
 
+  // Show loading state while checking authentication
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -60,14 +43,19 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     );
   }
 
+  // Don't render anything if not authenticated (will redirect)
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
-              <FileText className="h-8 w-8 text-primary" />
-              <h1 className="text-xl font-semibold">Question Papers Admin</h1>
+              <img src={logo.src} alt="JGEC Logo" className="h-12 w-12" />
+              <h1 className="text-lg font-semibold text-gray-900 hidden md:block">Question paper Admin</h1>
             </div>
             <div className="flex items-center gap-4">
               <Button variant="outline" onClick={() => router.push('/')}>

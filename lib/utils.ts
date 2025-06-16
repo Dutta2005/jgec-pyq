@@ -19,7 +19,7 @@ export const questionTypes = [
   { value: 'SEMESTER', label: 'Semester Exam' },
 ];
 
-export const years = Array.from({ length: 10 }, (_, i) => {
+export const years = Array.from({ length: 5 }, (_, i) => {
   const year = new Date().getFullYear() - i;
   return { value: year.toString(), label: year.toString() };
 });

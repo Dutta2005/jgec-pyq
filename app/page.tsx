@@ -8,11 +8,13 @@ import PaperFilter from '@/components/PaperFilter';
 import { QuestionPaper } from '@/types';
 import Link from 'next/link';
 import logo from '@/public/jgec.png';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function HomePage() {
   const [papers, setPapers] = useState<QuestionPaper[]>([]);
-  const [filteredPapers, setFilteredPapers] = useState<QuestionPaper[]>([]);
+  const [_, setFilteredPapers] = useState<QuestionPaper[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { isAuthenticated, isLoading: authLoading } = useAuth()
 
   useEffect(() => {
     fetchPapers();
@@ -47,12 +49,20 @@ export default function HomePage() {
               <img src={logo.src} alt="JGEC Logo" className="h-12 w-12" />
               <h1 className="text-xl font-bold">JGEC Question Papers</h1>
             </div>
-            <Link href="/admin/login">
+            {authLoading ? (
+              <Button variant="outline" size="sm">
+                <Settings className="h-4 w-4 mr-2" />
+                Admin Login
+              </Button>
+            ): (
+              <Link href={isAuthenticated ? '/admin/dashboard' : '/admin/login'}>
               <Button variant="outline" size="sm">
                 <Settings className="h-4 w-4 mr-2" />
                 Admin Login
               </Button>
             </Link>
+            )
+            }
           </div>
         </div>
       </header>
