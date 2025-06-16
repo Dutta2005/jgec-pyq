@@ -3,15 +3,32 @@
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Upload, FileText, BarChart3, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Upload, FileText, BarChart3, Users, Edit } from 'lucide-react';
 import AdminLayout from '@/components/AdminLayout';
 import FileUpload from '@/components/FileUpload';
 import PaperTable from '@/components/PaperTable';
 import { QuestionPaper } from '@/types';
+import { toast } from 'sonner';
 
 export default function AdminDashboardPage() {
   const [papers, setPapers] = useState<QuestionPaper[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [editingPaper, setEditingPaper] = useState<QuestionPaper | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Edit form state
+  const [editForm, setEditForm] = useState({
+    title: '',
+    year: '',
+    semester: '',
+    branch: '',
+    questionType: ''
+  });
 
   useEffect(() => {
     fetchPapers();
@@ -37,6 +54,58 @@ export default function AdminDashboardPage() {
 
   const handleDeleteSuccess = () => {
     fetchPapers();
+  };
+
+  const handleUpdateClick = (paper: QuestionPaper) => {
+    setEditingPaper(paper);
+    setEditForm({
+      title: paper.title,
+      year: paper.year.toString(),
+      semester: paper.semester.toString(),
+      branch: paper.branch,
+      questionType: paper.questionType
+    });
+  };
+
+  const handleUpdateSubmit = async () => {
+    if (!editingPaper) return;
+
+    setIsUpdating(true);
+    try {
+      const response = await fetch(`/api/papers/${editingPaper.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: editForm.title,
+          year: parseInt(editForm.year),
+          semester: parseInt(editForm.semester),
+          branch: editForm.branch,
+          questionType: editForm.questionType,
+        }),
+      });
+
+      if (response.ok) {
+        toast("Question paper updated successfully");
+        fetchPapers();
+        setEditingPaper(null);
+        setEditForm({
+          title: '',
+          year: '',
+          semester: '',
+          branch: '',
+          questionType: ''
+        });
+      } else {
+        throw new Error('Update failed');
+      }
+    } catch (error) {
+      console.error('Update error:', error);
+      toast("Failed to update question paper");
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const stats = {
@@ -144,7 +213,7 @@ export default function AdminDashboardPage() {
               <CardHeader>
                 <CardTitle>Manage Question Papers</CardTitle>
                 <p className="text-sm text-gray-600">
-                  View, download, and delete uploaded question papers
+                  View, download, edit, and delete uploaded question papers
                 </p>
               </CardHeader>
               <CardContent>
@@ -153,12 +222,140 @@ export default function AdminDashboardPage() {
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
                   </div>
                 ) : (
-                  <PaperTable papers={papers} onDeleteSuccess={handleDeleteSuccess} />
+                  <PaperTable 
+                    papers={papers} 
+                    onDeleteSuccess={handleDeleteSuccess}
+                    onUpdateClick={handleUpdateClick}
+                  />
                 )}
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Edit Dialog */}
+        <AlertDialog open={!!editingPaper} onOpenChange={(open) => !open && setEditingPaper(null)}>
+          <AlertDialogContent className="max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <Edit className="h-5 w-5" />
+                Edit Question Paper
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Update the details of the question paper. Changes will be saved immediately.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-title">Title</Label>
+                <Input
+                  id="edit-title"
+                  value={editForm.title}
+                  onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                  placeholder="Enter paper title"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-year">Year</Label>
+                  <Select
+                    value={editForm.year}
+                    onValueChange={(value) => setEditForm({ ...editForm, year: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 4 }, (_, i) => {
+                        const year = new Date().getFullYear() - i;
+                        return (
+                          <SelectItem key={year} value={year.toString()}>
+                            {year}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-semester">Semester</Label>
+                  <Select
+                    value={editForm.semester}
+                    onValueChange={(value) => setEditForm({ ...editForm, semester: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Semester" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
+                        <SelectItem key={sem} value={sem.toString()}>
+                          {sem}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-branch">Branch</Label>
+                <Select
+                  value={editForm.branch}
+                  onValueChange={(value) => setEditForm({ ...editForm, branch: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select branch" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="CSE">Computer Science Engineering</SelectItem>
+                    <SelectItem value="IT">Information Technology</SelectItem>
+                    <SelectItem value="ECE">Electronics & Communication Engineering</SelectItem>
+                    <SelectItem value="EE">Electrical Engineering</SelectItem>
+                    <SelectItem value="ME">Mechanical Engineering</SelectItem>
+                    <SelectItem value="CE">Civil Engineering</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-type">Question Type</Label>
+                <Select
+                  value={editForm.questionType}
+                  onValueChange={(value) => setEditForm({ ...editForm, questionType: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="INTERNAL">Internal Exam</SelectItem>
+                    <SelectItem value="SEMESTER">Semester Exam</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isUpdating}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleUpdateSubmit}
+                disabled={isUpdating || !editForm.title || !editForm.year || !editForm.semester || !editForm.branch || !editForm.questionType}
+              >
+                {isUpdating ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Updating...
+                  </>
+                ) : (
+                  'Update Paper'
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AdminLayout>
   );

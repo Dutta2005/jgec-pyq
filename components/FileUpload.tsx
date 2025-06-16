@@ -134,8 +134,8 @@ export default function FileUpload({ onUploadSuccess }: FileUploadProps) {
             <div>
               <Label htmlFor="branch">Branch</Label>
               <Select value={formData.branch} onValueChange={(value) => setFormData({ ...formData, branch: value })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select branch" />
+                <SelectTrigger className='sm:max-w-none max-w-[150px]'>
+                  <SelectValue placeholder="Select branch" className='truncate'/>
                 </SelectTrigger>
                 <SelectContent>
                   {branches.map((branch) => (
@@ -184,16 +184,17 @@ export default function FileUpload({ onUploadSuccess }: FileUploadProps) {
             >
               <input {...getInputProps()} />
               {file ? (
-                <div className="flex items-center justify-center gap-2">
-                  <FileText className="h-8 w-8 text-primary" />
-                  <div>
-                    <p className="font-medium">{file.name}</p>
+                <div className="flex items-center justify-center gap-2 max-w-full">
+                  <FileText className="h-8 w-8 text-primary flex-shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium truncate sm:max-w-none max-w-[120px]">{file.name}</p>
                     <p className="text-sm text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
                   </div>
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
+                    className='flex-shrink-0'
                     onClick={(e) => {
                       e.stopPropagation();
                       setFile(null);
@@ -209,6 +210,7 @@ export default function FileUpload({ onUploadSuccess }: FileUploadProps) {
                     {isDragActive ? 'Drop the PDF here' : 'Drag & drop a PDF file here'}
                   </p>
                   <p className="text-gray-500">or click to select a file</p>
+                  <p className="text-gray-500">Max file size: 5MB</p>
                 </div>
               )}
             </div>

@@ -4,16 +4,17 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Download, Trash2, Eye } from 'lucide-react';
+import { Trash2, Eye, Edit } from 'lucide-react';
 import { QuestionPaper } from '@/types';
 import { toast } from 'sonner';
 
 interface PaperTableProps {
   papers: QuestionPaper[];
   onDeleteSuccess: () => void;
+  onUpdateClick?: (paper: QuestionPaper) => void;
 }
 
-export default function PaperTable({ papers, onDeleteSuccess }: PaperTableProps) {
+export default function PaperTable({ papers, onDeleteSuccess, onUpdateClick }: PaperTableProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleDelete = async (id: string) => {
@@ -34,6 +35,12 @@ export default function PaperTable({ papers, onDeleteSuccess }: PaperTableProps)
       toast("Failed to delete question paper");
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleUpdate = (paper: QuestionPaper) => {
+    if (onUpdateClick) {
+      onUpdateClick(paper);
     }
   };
 
@@ -90,10 +97,12 @@ export default function PaperTable({ papers, onDeleteSuccess }: PaperTableProps)
                         <Eye className="h-4 w-4" />
                       </a>
                     </Button>
-                    <Button size="sm" variant="outline" asChild>
-                      <a href={paper.fileUrl} download>
-                        <Download className="h-4 w-4" />
-                      </a>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => handleUpdate(paper)}
+                    >
+                      <Edit className="h-4 w-4" />
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
