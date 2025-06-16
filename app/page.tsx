@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Settings } from 'lucide-react';
+import { FileText, Settings, Star } from 'lucide-react';
 import PaperFilter from '@/components/PaperFilter';
 import { QuestionPaper } from '@/types';
 import Link from 'next/link';
@@ -47,22 +47,34 @@ export default function HomePage() {
             <div className="flex items-center gap-2">
               {/* <GraduationCap className="h-8 w-8 text-primary" />*/}
               <img src={logo.src} alt="JGEC Logo" className="h-12 w-12" />
-              <h1 className="text-xl font-bold">JGEC Question Papers</h1>
+              <h1 className="text-xl font-bold hidden md:block">JGEC Question Papers</h1>
             </div>
-            {authLoading ? (
-              <Button variant="outline" size="sm">
-                <Settings className="h-4 w-4 mr-2" />
-                Admin Login
-              </Button>
-            ): (
-              <Link href={isAuthenticated ? '/admin/dashboard' : '/admin/login'}>
-              <Button variant="outline" size="sm">
-                <Settings className="h-4 w-4 mr-2" />
-                Admin Login
-              </Button>
-            </Link>
-            )
-            }
+            <div className="flex items-center gap-3">
+              <Link 
+                href="https://github.com/Dutta2005/jgec-pyq" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <Button variant="outline" size="sm" className="bg-green-500 text-white hover:bg-green-300">
+                  <Star className="h-4 w-4 mr-2 font-extrabold text-yellow-400" />
+                  Star on GitHub
+                </Button>
+              </Link>
+              {authLoading ? (
+                <Button variant="outline" size="sm">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Admin Login
+                </Button>
+              ): (
+                <Link href={isAuthenticated ? '/admin/dashboard' : '/admin/login'}>
+                <Button variant="outline" size="sm">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Admin Login
+                </Button>
+              </Link>
+              )
+              }
+            </div>
           </div>
         </div>
       </header>
