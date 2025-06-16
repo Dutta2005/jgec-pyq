@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verify admin token
@@ -18,7 +18,8 @@ export async function PUT(
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    const { id } = params;
+    // Await the params Promise
+    const { id } = await params;
     const body = await request.json();
     const { title, year, semester, branch, questionType } = body;
 
