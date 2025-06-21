@@ -9,10 +9,11 @@ import { QuestionPaper } from '@/types';
 import Link from 'next/link';
 import logo from '@/public/jgec.png';
 import { useAuth } from '@/hooks/useAuth';
+import Image from 'next/image';
 
 export default function HomePage() {
   const [papers, setPapers] = useState<QuestionPaper[]>([]);
-  const [_, setFilteredPapers] = useState<QuestionPaper[]>([]);
+  const [, setFilteredPapers] = useState<QuestionPaper[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { isAuthenticated, isLoading: authLoading } = useAuth()
 
@@ -46,7 +47,7 @@ export default function HomePage() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
               {/* <GraduationCap className="h-8 w-8 text-primary" />*/}
-              <img src={logo.src} alt="JGEC Logo" className="h-12 w-12" />
+              <Image src={logo.src} alt="JGEC Logo" width={50} height={50} />
               <h1 className="text-xl font-bold hidden md:block">JGEC Question Papers</h1>
             </div>
             <div className="flex items-center gap-3">
@@ -124,7 +125,7 @@ export default function HomePage() {
                     </div>
                   </div>
                   
-                  <PaperFilter papers={papers} onFilterChange={handleFilterChange} />
+                  <PaperFilter papers={papers} onFilterChangeAction={handleFilterChange} />
                 </div>
               )}
             </CardContent>

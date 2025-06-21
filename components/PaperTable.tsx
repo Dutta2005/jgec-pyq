@@ -10,11 +10,11 @@ import { toast } from 'sonner';
 
 interface PaperTableProps {
   papers: QuestionPaper[];
-  onDeleteSuccess: () => void;
+  onDeleteSuccessAction: () => void;
   onUpdateClick?: (paper: QuestionPaper) => void;
 }
 
-export default function PaperTable({ papers, onDeleteSuccess, onUpdateClick }: PaperTableProps) {
+export default function PaperTable({ papers, onDeleteSuccessAction, onUpdateClick }: PaperTableProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleDelete = async (id: string) => {
@@ -26,7 +26,7 @@ export default function PaperTable({ papers, onDeleteSuccess, onUpdateClick }: P
 
       if (response.ok) {
         toast("Question paper deleted successfully");
-        onDeleteSuccess();
+        onDeleteSuccessAction();
       } else {
         throw new Error('Delete failed');
       }
@@ -101,12 +101,13 @@ export default function PaperTable({ papers, onDeleteSuccess, onUpdateClick }: P
                       size="sm" 
                       variant="outline" 
                       onClick={() => handleUpdate(paper)}
+                      className='cursor-pointer'
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button size="sm" variant="outline" disabled={deletingId === paper.id}>
+                        <Button size="sm" variant="outline" disabled={deletingId === paper.id} className='cursor-pointer'>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </AlertDialogTrigger>

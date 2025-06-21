@@ -11,10 +11,10 @@ import { toast } from 'sonner';
 
 interface PaperFilterProps {
   papers: QuestionPaper[];
-  onFilterChange: (filteredPapers: QuestionPaper[]) => void;
+  onFilterChangeAction: (filteredPapers: QuestionPaper[]) => void;
 }
 
-export default function PaperFilter({ papers, onFilterChange }: PaperFilterProps) {
+export default function PaperFilter({ papers, onFilterChangeAction }: PaperFilterProps) {
   const [filters, setFilters] = useState({
     year: '',
     branch: '',
@@ -46,7 +46,7 @@ export default function PaperFilter({ papers, onFilterChange }: PaperFilterProps
     }
 
     setFilteredPapers(filtered);
-    onFilterChange(filtered);
+    onFilterChangeAction(filtered);
   };
 
   const clearFilters = () => {
@@ -57,7 +57,7 @@ export default function PaperFilter({ papers, onFilterChange }: PaperFilterProps
       questionType: '',
     });
     setFilteredPapers([]);
-    onFilterChange(papers);
+    onFilterChangeAction(papers);
   };
 
   const handleDownload = async (paper: QuestionPaper) => {

@@ -7,6 +7,7 @@ import { LogOut } from 'lucide-react';
 import { toast } from 'sonner';
 import logo from '@/public/jgec.png';
 import { useAuth } from '@/hooks/useAuth';
+import Image from 'next/image';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -54,7 +55,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
-              <img src={logo.src} alt="JGEC Logo" className="h-12 w-12" />
+              <Image src={logo.src} alt="JGEC Logo" width={50} height={50} />
               <h1 className="text-lg font-semibold text-gray-900 hidden md:block">Question paper Admin</h1>
             </div>
             <div className="flex items-center gap-4">

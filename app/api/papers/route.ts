@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { Prisma, Branch, QuestionType } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,11 +10,18 @@ export async function GET(request: NextRequest) {
     const semester = searchParams.get('semester');
     const questionType = searchParams.get('questionType');
 
-    const where: any = {};
+    const where: Prisma.QuestionPaperWhereInput = {};
+    
     if (year) where.year = parseInt(year);
-    if (branch) where.branch = branch;
     if (semester) where.semester = parseInt(semester);
-    if (questionType) where.questionType = questionType;
+    
+    if (branch && Object.values(Branch).includes(branch as Branch)) {
+      where.branch = branch as Branch;
+    }
+    
+    if (questionType && Object.values(QuestionType).includes(questionType as QuestionType)) {
+      where.questionType = questionType as QuestionType;
+    }
 
     const papers = await prisma.questionPaper.findMany({
       where,
@@ -26,7 +34,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(papers);
   } catch (error) {
-    console.log('Error ', error)
+    console.log('Error ', error);
     return NextResponse.json({ error: 'Failed to fetch papers' }, { status: 500 });
   }
 }
@@ -59,7 +67,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.log('Error ', error)
+    console.log('Error ', error);
     return NextResponse.json({ error: 'Failed to delete paper' }, { status: 500 });
   }
 }

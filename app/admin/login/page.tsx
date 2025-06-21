@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Lock, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 import logo from "@/public/jgec.png";
+import Image from 'next/image';
 
 export default function AdminLoginPage() {
   const [formData, setFormData] = useState({
@@ -52,7 +53,7 @@ export default function AdminLoginPage() {
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             {/* <GraduationCap className="h-12 w-12 text-primary" /> */}
-            <img src={logo.src} alt="Logo" className="h-20 w-20" />
+            <Image src={logo.src} alt="Logo" width={100} height={100} />
           </div>
           <CardTitle className="text-2xl">Admin Login</CardTitle>
           <p className="text-gray-600">Access the admin dashboard</p>

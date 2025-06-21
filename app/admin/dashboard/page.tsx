@@ -3,11 +3,10 @@
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Upload, FileText, BarChart3, Users, Edit } from 'lucide-react';
 import AdminLayout from '@/components/AdminLayout';
 import FileUpload from '@/components/FileUpload';
@@ -224,7 +223,7 @@ export default function AdminDashboardPage() {
                 ) : (
                   <PaperTable 
                     papers={papers} 
-                    onDeleteSuccess={handleDeleteSuccess}
+                    onDeleteSuccessAction={handleDeleteSuccess}
                     onUpdateClick={handleUpdateClick}
                   />
                 )}

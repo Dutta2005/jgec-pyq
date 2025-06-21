@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { Branch, QuestionType } from '@prisma/client';
 
 export async function PUT(
   request: NextRequest,
@@ -44,8 +45,8 @@ export async function PUT(
         title,
         year: parseInt(year),
         semester: parseInt(semester),
-        branch: branch as any,
-        questionType: questionType as any,
+        branch: branch as Branch,
+        questionType: questionType as QuestionType,
       },
     });
 

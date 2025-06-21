@@ -1,6 +1,11 @@
 import { SignJWT, jwtVerify } from 'jose';
 import bcrypt from 'bcryptjs';
 
+export interface JwtPayload {
+  email: string;
+  role: 'admin';
+}
+
 const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export async function hashPassword(password: string): Promise<string> {
@@ -11,17 +16,23 @@ export async function verifyPassword(password: string, hashedPassword: string): 
   return bcrypt.compare(password, hashedPassword);
 }
 
-export async function createToken(payload: any): Promise<string> {
-  return new SignJWT(payload)
+export async function createToken(payload: JwtPayload): Promise<string> {
+  return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: 'HS256' })
     .setExpirationTime('24h')
     .sign(secret);
 }
 
-export async function verifyToken(token: string): Promise<any> {
+export async function verifyToken(token: string): Promise<JwtPayload | null> {
   try {
     const { payload } = await jwtVerify(token, secret);
-    return payload;
+    if (
+      typeof payload.email === 'string' &&
+      (payload.role === 'admin')
+    ) {
+      return { email: payload.email, role: payload.role };
+    }
+    return null;
   } catch (error) {
     console.log('Error verifying token:', error);
     return null;

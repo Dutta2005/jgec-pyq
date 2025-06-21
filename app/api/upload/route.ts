@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { uploadToCloudinary } from '@/lib/cloudinary';
 import { prisma } from '@/lib/db';
+import { Branch, QuestionType } from '@prisma/client';
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,8 +37,8 @@ export async function POST(request: NextRequest) {
       data: {
         year,
         semester,
-        branch: branch as any,
-        questionType: questionType as any,
+        branch: branch as Branch,
+        questionType: questionType as QuestionType,
         title,
         fileName: file.name,
         fileUrl: uploadResult.secure_url,
