@@ -12,10 +12,10 @@ import { branches, questionTypes, years, semesters } from '@/lib/utils';
 import { toast } from 'sonner';
 
 interface FileUploadProps {
-  onUploadSuccess: () => void;
+  onUploadSuccessAction: () => void;
 }
 
-export default function FileUpload({ onUploadSuccess }: FileUploadProps) {
+export default function FileUpload({ onUploadSuccessAction }: FileUploadProps) {
   const [formData, setFormData] = useState({
     year: '',
     semester: '',
@@ -74,7 +74,7 @@ export default function FileUpload({ onUploadSuccess }: FileUploadProps) {
           title: '',
         });
         setFile(null);
-        onUploadSuccess();
+        onUploadSuccessAction();
       } else {
         throw new Error('Upload failed');
       }

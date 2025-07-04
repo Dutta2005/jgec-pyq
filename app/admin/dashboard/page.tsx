@@ -11,14 +11,30 @@ import { Upload, FileText, BarChart3, Users, Edit } from 'lucide-react';
 import AdminLayout from '@/components/AdminLayout';
 import FileUpload from '@/components/FileUpload';
 import PaperTable from '@/components/PaperTable';
+import PaperSearch from '@/components/PaperSearch';
 import { QuestionPaper } from '@/types';
 import { toast } from 'sonner';
 
+interface SearchFilters {
+  query: string;
+  year: string;
+  branch: string;
+  type: string;
+}
+
 export default function AdminDashboardPage() {
   const [papers, setPapers] = useState<QuestionPaper[]>([]);
+  const [filteredPapers, setFilteredPapers] = useState<QuestionPaper[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
   const [editingPaper, setEditingPaper] = useState<QuestionPaper | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [activeFilters, setActiveFilters] = useState<SearchFilters>({
+    query: '',
+    year: '',
+    branch: '',
+    type: ''
+  });
 
   // Edit form state
   const [editForm, setEditForm] = useState({
@@ -33,18 +49,60 @@ export default function AdminDashboardPage() {
     fetchPapers();
   }, []);
 
+  useEffect(() => {
+    // Update filtered papers when papers change
+    setFilteredPapers(papers);
+  }, [papers]);
+
   const fetchPapers = async () => {
     try {
       const response = await fetch('/api/papers');
       if (response.ok) {
         const data = await response.json();
         setPapers(data);
+        setFilteredPapers(data);
       }
     } catch (error) {
       console.error('Failed to fetch papers:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSearch = async (filters: SearchFilters) => {
+    setIsSearching(true);
+    setActiveFilters(filters);
+    
+    try {
+      const params = new URLSearchParams();
+      if (filters.query) params.append('q', filters.query);
+      if (filters.year) params.append('year', filters.year);
+      if (filters.branch) params.append('branch', filters.branch);
+      if (filters.type) params.append('type', filters.type);
+
+      const response = await fetch(`/api/papers/search?${params.toString()}`);
+      if (response.ok) {
+        const data = await response.json();
+        setFilteredPapers(data);
+      } else {
+        throw new Error('Search failed');
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      toast("Failed to search papers");
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleResetSearch = () => {
+    setActiveFilters({
+      query: '',
+      year: '',
+      branch: '',
+      type: ''
+    });
+    setFilteredPapers(papers);
   };
 
   const handleUploadSuccess = () => {
@@ -114,6 +172,8 @@ export default function AdminDashboardPage() {
     internal: papers.filter(p => p.questionType === 'INTERNAL').length,
     semester: papers.filter(p => p.questionType === 'SEMESTER').length,
   };
+
+  const hasActiveSearch = activeFilters.query || activeFilters.year || activeFilters.branch || activeFilters.type;
 
   return (
     <AdminLayout>
@@ -204,31 +264,50 @@ export default function AdminDashboardPage() {
           </TabsList>
 
           <TabsContent value="upload">
-            <FileUpload onUploadSuccess={handleUploadSuccess} />
+            <FileUpload onUploadSuccessAction={handleUploadSuccess} />
           </TabsContent>
 
           <TabsContent value="manage">
-            <Card>
-              <CardHeader>
-                <CardTitle>Manage Question Papers</CardTitle>
-                <p className="text-sm text-gray-600">
-                  View, download, edit, and delete uploaded question papers
-                </p>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-                  </div>
-                ) : (
-                  <PaperTable 
-                    papers={papers} 
-                    onDeleteSuccessAction={handleDeleteSuccess}
-                    onUpdateClick={handleUpdateClick}
-                  />
-                )}
-              </CardContent>
-            </Card>
+            <div className="space-y-4">
+              {/* Search Component */}
+              <PaperSearch
+                onSearchAction={handleSearch}
+                onResetAction={handleResetSearch}
+                isLoading={isSearching}
+              />
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>Manage Question Papers</span>
+                    {hasActiveSearch && (
+                      <span className="text-sm font-normal text-gray-600">
+                        Showing {filteredPapers.length} of {papers.length} papers
+                      </span>
+                    )}
+                  </CardTitle>
+                  <p className="text-sm text-gray-600">
+                    {hasActiveSearch 
+                      ? 'Search results - view, download, edit, and delete question papers'
+                      : 'View, download, edit, and delete uploaded question papers'
+                    }
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  {isLoading ? (
+                    <div className="flex items-center justify-center py-12">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                    </div>
+                  ) : (
+                    <PaperTable 
+                      papers={filteredPapers} 
+                      onDeleteSuccessAction={handleDeleteSuccess}
+                      onUpdateClick={handleUpdateClick}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
 
