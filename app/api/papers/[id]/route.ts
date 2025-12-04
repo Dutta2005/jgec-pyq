@@ -3,6 +3,28 @@ import { verifyToken } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { Branch, QuestionType } from '@prisma/client';
 
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    const paper = await prisma.questionPaper.findUnique({
+      where: { id },
+    });
+
+    if (!paper) {
+      return NextResponse.json({ error: 'Paper not found' }, { status: 404 });
+    }
+
+    return NextResponse.json(paper);
+  } catch (error) {
+    console.error('Fetch error:', error);
+    return NextResponse.json({ error: 'Failed to fetch paper' }, { status: 500 });
+  }
+}
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

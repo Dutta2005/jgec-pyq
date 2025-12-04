@@ -1,21 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Settings, Star } from 'lucide-react';
+import { FileText} from 'lucide-react';
 import PaperFilter from '@/components/PaperFilter';
 import { QuestionPaper } from '@/types';
-import Link from 'next/link';
-import logo from '@/public/jgec.png';
-import { useAuth } from '@/hooks/useAuth';
-import Image from 'next/image';
+import Header from '@/components/Header';
 
 export default function HomePage() {
   const [papers, setPapers] = useState<QuestionPaper[]>([]);
   const [, setFilteredPapers] = useState<QuestionPaper[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { isAuthenticated, isLoading: authLoading } = useAuth()
 
   useEffect(() => {
     fetchPapers();
@@ -42,86 +37,60 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-2">
-              {/* <GraduationCap className="h-8 w-8 text-primary" />*/}
-              <Image src={logo.src} alt="JGEC Logo" width={50} height={50} />
-              <h1 className="text-xl font-bold hidden md:block">JGEC Question Papers</h1>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link 
-                href="https://github.com/Dutta2005/jgec-pyq" 
-                target="_blank" 
-                rel="noopener noreferrer"
-              >
-                <Button variant="outline" size="sm" className="bg-green-500 text-white hover:bg-green-300">
-                  <Star className="h-4 w-4 mr-2 font-extrabold text-yellow-400" />
-                  Star on GitHub
-                </Button>
-              </Link>
-              {authLoading ? (
-                <Button variant="outline" size="sm">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Admin Login
-                </Button>
-              ): (
-                <Link href={isAuthenticated ? '/admin/dashboard' : '/admin/login'}>
-                <Button variant="outline" size="sm">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Admin Login
-                </Button>
-              </Link>
-              )
-              }
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+      <Header />
+      <main id="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" role="main">
+        <section className="text-center mb-8" aria-labelledby="page-title">
+          <h1 id="page-title" className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
             Download Previous Year Question Papers
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          </h1>
+          <p className="text-base sm:text-lg text-gray-700 max-w-2xl mx-auto leading-relaxed">
             Access previous year question papers for all branches and semesters. 
             Filter by year, branch, semester, and question type to find exactly what you need.
           </p>
-        </div>
+        </section>
 
-        <div className="grid gap-8">
-          <Card className="bg-white/80 backdrop-blur-sm">
+        <section className="grid gap-8" aria-labelledby="library-section">
+          <Card className="bg-white/80 backdrop-blur-sm shadow-md">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
+              <CardTitle id="library-section" className="flex items-center gap-2 text-xl">
+                <FileText className="h-6 w-6 text-blue-600" aria-hidden="true" />
                 Question Papers Library
               </CardTitle>
             </CardHeader>
             <CardContent>
               {isLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                <div className="flex flex-col items-center justify-center py-16" role="status" aria-live="polite">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4"></div>
+                  <p className="text-gray-600 font-medium">Loading question papers...</p>
+                  <p className="text-sm text-gray-500 mt-1">Please wait a moment</p>
+                </div>
+              ) : papers.length === 0 ? (
+                <div className="text-center py-16">
+                  <FileText className="h-16 w-16 mx-auto text-gray-400 mb-4" aria-hidden="true" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No Papers Available</h3>
+                  <p className="text-gray-600">Question papers will appear here once uploaded by administrators.</p>
                 </div>
               ) : (
                 <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-600">{papers.length}</div>
-                      <div className="text-sm text-blue-800">Total Papers</div>
+                  {/* Stats Section */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" role="region" aria-label="Library statistics">
+                    <div className="bg-blue-50 p-5 rounded-lg border border-blue-100 hover:shadow-sm transition-shadow">
+                      <div className="text-3xl font-bold text-blue-600" aria-label={`${papers.length} total papers`}>
+                        {papers.length}
+                      </div>
+                      <div className="text-sm font-medium text-blue-800 mt-1">Total Papers</div>
                     </div>
-                    <div className="bg-green-50 p-4 rounded-lg">
-                      <div className="text-2xl font-bold text-green-600">
+                    <div className="bg-green-50 p-5 rounded-lg border border-green-100 hover:shadow-sm transition-shadow">
+                      <div className="text-3xl font-bold text-green-600" aria-label={`${new Set(papers.map(p => p.branch)).size} branches available`}>
                         {new Set(papers.map(p => p.branch)).size}
                       </div>
-                      <div className="text-sm text-green-800">Branches</div>
+                      <div className="text-sm font-medium text-green-800 mt-1">Branches</div>
                     </div>
-                    <div className="bg-purple-50 p-4 rounded-lg">
-                      <div className="text-2xl font-bold text-purple-600">
+                    <div className="bg-purple-50 p-5 rounded-lg border border-purple-100 hover:shadow-sm transition-shadow">
+                      <div className="text-3xl font-bold text-purple-600" aria-label={`${new Set(papers.map(p => p.year)).size} years available`}>
                         {new Set(papers.map(p => p.year)).size}
                       </div>
-                      <div className="text-sm text-purple-800">Years</div>
+                      <div className="text-sm font-medium text-purple-800 mt-1">Years</div>
                     </div>
                   </div>
                   
@@ -130,13 +99,14 @@ export default function HomePage() {
               )}
             </CardContent>
           </Card>
-        </div>
+        </section>
       </main>
 
-      <footer className="bg-white/80 backdrop-blur-sm border-t mt-12">
+      <footer className="bg-white/80 backdrop-blur-sm border-t mt-12" role="contentinfo">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="text-center text-gray-600">
-            <p>&copy; 2025 College Question Papers Portal. All rights reserved.</p>
+            <p className="text-sm">&copy; {new Date().getFullYear()} JGEC Question Papers Portal. All rights reserved.</p>
+            <p className="text-xs text-gray-500 mt-1">Made with ❤️ for students</p>
           </div>
         </div>
       </footer>
