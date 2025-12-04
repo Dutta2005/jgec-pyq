@@ -64,6 +64,9 @@ export default function FileUpload({ onUploadSuccessAction }: FileUploadProps) {
     setIsUploading(true);
 
     try {
+      // TypeScript guard - validation already ensures file is not null
+      if (!file) return;
+      
       const uploadFormData = new FormData();
       uploadFormData.append('file', file);
       uploadFormData.append('year', formData.year);

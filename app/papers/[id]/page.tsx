@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -23,7 +22,6 @@ interface PaperViewerPageState extends ViewerState {
 
 export default function PaperViewerPage() {
   const params = useParams<{ id: string }>();
-  const router = useRouter();
   const [state, setState] = useState<PaperViewerPageState>({
     paper: null,
     isLoading: true,
@@ -42,9 +40,10 @@ export default function PaperViewerPage() {
           throw new Error(data?.error || 'Failed to load paper');
         }
         const paper: QuestionPaper = await response.json();
-        setState({ paper, isLoading: false, error: null });
-      } catch (error: any) {
-        setState({ paper: null, isLoading: false, error: error.message || 'Failed to load paper' });
+        setState({ paper, isLoading: false, error: null, isDownloading: false });
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to load paper';
+        setState({ paper: null, isLoading: false, error: errorMessage, isDownloading: false });
       }
     };
 
