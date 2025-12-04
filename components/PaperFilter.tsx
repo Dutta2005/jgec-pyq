@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Filter, Download } from 'lucide-react';
+import { Filter, Download, Eye } from 'lucide-react';
 import { branches, questionTypes, years, semesters } from '@/lib/utils';
 import { QuestionPaper } from '@/types';
 import { toast } from 'sonner';
@@ -62,19 +63,23 @@ export default function PaperFilter({ papers, onFilterChangeAction }: PaperFilte
 
   const handleDownload = async (paper: QuestionPaper) => {
     setDownloadingId(paper.id);
+    toast.loading('Downloading...', { id: `download-${paper.id}` });
     
     try {
-      // First, try to validate the URL
-      const response = await fetch(paper.fileUrl, { method: 'HEAD' });
+      // Fetch the file as a blob
+      const response = await fetch(paper.fileUrl);
       
       if (!response.ok) {
         throw new Error('File not accessible');
       }
 
-      // Create a temporary link and trigger download
+      // Get the blob data
+      const blob = await response.blob();
+      
+      // Create a blob URL and trigger download
+      const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = paper.fileUrl;
-      link.target = '_blank';
+      link.href = blobUrl;
       link.download = `${paper.title}.pdf`;
       
       // Add to DOM, click, then remove
@@ -82,18 +87,13 @@ export default function PaperFilter({ papers, onFilterChangeAction }: PaperFilte
       link.click();
       document.body.removeChild(link);
       
-      toast('Download started');
+      // Clean up the blob URL
+      URL.revokeObjectURL(blobUrl);
+      
+      toast.success('Download completed', { id: `download-${paper.id}` });
     } catch (error) {
       console.error('Download error:', error);
-      toast('Failed to download file. Please try again or contact admin.');
-      
-      // Fallback: try opening in new tab
-      try {
-        window.open(paper.fileUrl, '_blank');
-      } catch (fallbackError) {
-        console.log('Fallback error:', fallbackError);
-        toast('Unable to access the file.');
-      }
+      toast.error('Failed to download file. Please try again.', { id: `download-${paper.id}` });
     } finally {
       setDownloadingId(null);
     }
@@ -176,29 +176,66 @@ export default function PaperFilter({ papers, onFilterChangeAction }: PaperFilte
           </Button>
         </div>
 
-        {filteredPapers.length > 0 && (
+        {filteredPapers.length > 0 ? (
           <div className="space-y-2">
-            <h3 className="font-semibold">Available Papers ({filteredPapers.length})</h3>
-            <div className="grid gap-2 max-h-64 overflow-y-auto">
+            <h3 className="font-semibold text-lg text-gray-900">
+              Available Papers 
+              <span className="ml-2 px-2.5 py-0.5 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                {filteredPapers.length}
+              </span>
+            </h3>
+            <div className="grid gap-2 max-h-[400px] overflow-y-auto pr-2" role="list" aria-label="Filtered question papers">
               {filteredPapers.map((paper) => (
-                <div key={paper.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium">{paper.title}</p>
-                    <p className="text-sm text-gray-500">
-                      {paper.year} • {paper.branch} • Semester {paper.semester} • {paper.questionType}
+                <div key={paper.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg hover:shadow-md transition-shadow gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-gray-900 truncate" title={paper.title}>{paper.title}</p>
+                    <p className="text-sm text-gray-600 mt-1">
+                      <span className="inline-block">{paper.year}</span>
+                      <span className="mx-1">•</span>
+                      <span className="inline-block">{paper.branch}</span>
+                      <span className="mx-1">•</span>
+                      <span className="inline-block">Sem {paper.semester}</span>
+                      <span className="mx-1">•</span>
+                      <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-blue-50 text-blue-700">
+                        {paper.questionType === 'INTERNAL' ? 'Internal' : 'Semester'}
+                      </span>
                     </p>
                   </div>
-                  <Button 
-                    size="sm" 
-                    onClick={() => handleDownload(paper)}
-                    disabled={downloadingId === paper.id}
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    {downloadingId === paper.id ? 'Downloading...' : 'Download'}
-                  </Button>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      asChild
+                      aria-label={`View ${paper.title}`}
+                    >
+                      <Link href={`/papers/${paper.id}`}>
+                        <>
+                          <Eye className="h-4 w-4 sm:mr-2" />
+                          <span className="hidden sm:inline">View</span>
+                        </>
+                      </Link>
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      onClick={() => handleDownload(paper)}
+                      disabled={downloadingId === paper.id}
+                      aria-label={`Download ${paper.title}`}
+                    >
+                      <Download className="h-4 w-4 sm:mr-2" />
+                      <span className="hidden sm:inline">
+                        {downloadingId === paper.id ? 'Downloading...' : 'Download'}
+                      </span>
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            <Filter className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+            <p className="text-sm font-medium">No papers match your filters</p>
+            <p className="text-xs mt-1">Try adjusting your filter criteria</p>
           </div>
         )}
       </CardContent>
