@@ -10,6 +10,7 @@ import { Lock, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 import logo from "@/public/jgec.png";
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function AdminLoginPage() {
   const [formData, setFormData] = useState({
@@ -92,8 +93,11 @@ export default function AdminLoginPage() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full cursor-pointer" disabled={isLoading}>
               {isLoading ? 'Signing in...' : 'Sign In'}
+            </Button>
+            <Button variant="outline" asChild className="w-full cursor-pointer mt-4">
+              <Link href="/">Back to Home</Link>
             </Button>
           </form>
         </CardContent>

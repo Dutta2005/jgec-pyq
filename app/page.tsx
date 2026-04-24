@@ -1,9 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText} from 'lucide-react';
-import PaperFilter from '@/components/PaperFilter';
+
+const PaperFilter = dynamic(() => import('@/components/PaperFilter'), {
+  loading: () => (
+    <div className="flex flex-col items-center justify-center p-12 space-y-4">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <p className="text-sm text-gray-500">Loading filters...</p>
+    </div>
+  ),
+});
 import Header from '@/components/Header';
 
 export default function HomePage() {

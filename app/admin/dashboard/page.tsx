@@ -9,9 +9,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Upload, FileText, BarChart3, Users, Edit } from 'lucide-react';
 import AdminLayout from '@/components/AdminLayout';
-import FileUpload from '@/components/FileUpload';
-import PaperTable from '@/components/PaperTable';
-import PaperSearch from '@/components/PaperSearch';
+import dynamic from 'next/dynamic';
+
+const FileUpload = dynamic(() => import('@/components/FileUpload'), {
+  loading: () => <div className="flex justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>
+});
+const PaperTable = dynamic(() => import('@/components/PaperTable'), {
+  loading: () => <div className="flex justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>
+});
+const PaperSearch = dynamic(() => import('@/components/PaperSearch'), {
+  loading: () => <div className="flex justify-center p-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>
+});
 import { QuestionPaper } from '@/types';
 import { toast } from 'sonner';
 
