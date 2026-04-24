@@ -83,7 +83,7 @@ export default function PaperSearch({ onSearchAction, onResetAction, isLoading =
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
-            <Button onClick={handleSearch} disabled={isLoading} className="shrink-0">
+            <Button onClick={handleSearch} disabled={isLoading} className="shrink-0 cursor-pointer">
               {isLoading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -130,7 +130,7 @@ export default function PaperSearch({ onSearchAction, onResetAction, isLoading =
                   value={filters.branch}
                   onValueChange={(value) => setFilters({ ...filters, branch: value })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select branch" />
                   </SelectTrigger>
                   <SelectContent>

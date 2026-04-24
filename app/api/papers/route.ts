@@ -10,15 +10,19 @@ export async function GET(request: NextRequest) {
     const semester = searchParams.get('semester');
     const questionType = searchParams.get('questionType');
 
+    if (!year && !branch && !semester && !questionType) {
+      return NextResponse.json([]);
+    }
+
     const where: Prisma.QuestionPaperWhereInput = {};
-    
+
     if (year) where.year = parseInt(year);
     if (semester) where.semester = parseInt(semester);
-    
+
     if (branch && Object.values(Branch).includes(branch as Branch)) {
       where.branch = branch as Branch;
     }
-    
+
     if (questionType && Object.values(QuestionType).includes(questionType as QuestionType)) {
       where.questionType = questionType as QuestionType;
     }

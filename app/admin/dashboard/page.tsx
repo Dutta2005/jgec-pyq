@@ -23,7 +23,7 @@ interface SearchFilters {
 }
 
 export default function AdminDashboardPage() {
-  const [papers, setPapers] = useState<QuestionPaper[]>([]);
+  const [stats, setStats] = useState({ totalPapers: 0, branches: 0, years: 0, internal: 0, semester: 0 });
   const [filteredPapers, setFilteredPapers] = useState<QuestionPaper[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
@@ -46,24 +46,18 @@ export default function AdminDashboardPage() {
   });
 
   useEffect(() => {
-    fetchPapers();
+    fetchStats();
   }, []);
 
-  useEffect(() => {
-    // Update filtered papers when papers change
-    setFilteredPapers(papers);
-  }, [papers]);
-
-  const fetchPapers = async () => {
+  const fetchStats = async () => {
     try {
-      const response = await fetch('/api/papers');
+      const response = await fetch('/api/stats');
       if (response.ok) {
         const data = await response.json();
-        setPapers(data);
-        setFilteredPapers(data);
+        setStats(data);
       }
     } catch (error) {
-      console.error('Failed to fetch papers:', error);
+      console.error('Failed to fetch stats:', error);
     } finally {
       setIsLoading(false);
     }
@@ -102,15 +96,23 @@ export default function AdminDashboardPage() {
       branch: '',
       type: ''
     });
-    setFilteredPapers(papers);
+    setFilteredPapers([]);
   };
 
   const handleUploadSuccess = () => {
-    fetchPapers();
+    fetchStats();
+    if (activeFilters.query || activeFilters.year || activeFilters.branch || activeFilters.type) {
+      handleSearch(activeFilters);
+    }
   };
 
   const handleDeleteSuccess = () => {
-    fetchPapers();
+    fetchStats();
+    if (activeFilters.query || activeFilters.year || activeFilters.branch || activeFilters.type) {
+      handleSearch(activeFilters);
+    } else {
+      setFilteredPapers([]);
+    }
   };
 
   const handleUpdateClick = (paper: QuestionPaper) => {
@@ -145,7 +147,10 @@ export default function AdminDashboardPage() {
 
       if (response.ok) {
         toast("Question paper updated successfully");
-        fetchPapers();
+        fetchStats();
+        if (activeFilters.query || activeFilters.year || activeFilters.branch || activeFilters.type) {
+          handleSearch(activeFilters);
+        }
         setEditingPaper(null);
         setEditForm({
           title: '',
@@ -165,13 +170,7 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const stats = {
-    totalPapers: papers.length,
-    branches: new Set(papers.map(p => p.branch)).size,
-    years: new Set(papers.map(p => p.year)).size,
-    internal: papers.filter(p => p.questionType === 'INTERNAL').length,
-    semester: papers.filter(p => p.questionType === 'SEMESTER').length,
-  };
+  // Stats are now fetched directly from /api/stats
 
   const hasActiveSearch = activeFilters.query || activeFilters.year || activeFilters.branch || activeFilters.type;
 
@@ -282,7 +281,7 @@ export default function AdminDashboardPage() {
                     <span>Manage Question Papers</span>
                     {hasActiveSearch && (
                       <span className="text-sm font-normal text-gray-600">
-                        Showing {filteredPapers.length} of {papers.length} papers
+                        Showing {filteredPapers.length} of {stats.totalPapers} papers
                       </span>
                     )}
                   </CardTitle>

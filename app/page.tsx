@@ -4,35 +4,28 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText} from 'lucide-react';
 import PaperFilter from '@/components/PaperFilter';
-import { QuestionPaper } from '@/types';
 import Header from '@/components/Header';
 
 export default function HomePage() {
-  const [papers, setPapers] = useState<QuestionPaper[]>([]);
-  const [, setFilteredPapers] = useState<QuestionPaper[]>([]);
+  const [stats, setStats] = useState({ totalPapers: 0, branches: 0, years: 0 });
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchPapers();
+    fetchStats();
   }, []);
 
-  const fetchPapers = async () => {
+  const fetchStats = async () => {
     try {
-      const response = await fetch('/api/papers');
+      const response = await fetch('/api/stats');
       if (response.ok) {
         const data = await response.json();
-        setPapers(data);
-        setFilteredPapers(data);
+        setStats(data);
       }
     } catch (error) {
-      console.error('Failed to fetch papers:', error);
+      console.error('Failed to fetch stats:', error);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleFilterChange = (filtered: QuestionPaper[]) => {
-    setFilteredPapers(filtered);
   };
 
   return (
@@ -64,7 +57,7 @@ export default function HomePage() {
                   <p className="text-gray-600 font-medium">Loading question papers...</p>
                   <p className="text-sm text-gray-500 mt-1">Please wait a moment</p>
                 </div>
-              ) : papers.length === 0 ? (
+              ) : stats.totalPapers === 0 ? (
                 <div className="text-center py-16">
                   <FileText className="h-16 w-16 mx-auto text-gray-400 mb-4" aria-hidden="true" />
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">No Papers Available</h3>
@@ -75,26 +68,26 @@ export default function HomePage() {
                   {/* Stats Section */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4" role="region" aria-label="Library statistics">
                     <div className="bg-blue-50 p-5 rounded-lg border border-blue-100 hover:shadow-sm transition-shadow">
-                      <div className="text-3xl font-bold text-blue-600" aria-label={`${papers.length} total papers`}>
-                        {papers.length}
+                      <div className="text-3xl font-bold text-blue-600" aria-label={`${stats.totalPapers} total papers`}>
+                        {stats.totalPapers}
                       </div>
                       <div className="text-sm font-medium text-blue-800 mt-1">Total Papers</div>
                     </div>
                     <div className="bg-green-50 p-5 rounded-lg border border-green-100 hover:shadow-sm transition-shadow">
-                      <div className="text-3xl font-bold text-green-600" aria-label={`${new Set(papers.map(p => p.branch)).size} branches available`}>
-                        {new Set(papers.map(p => p.branch)).size}
+                      <div className="text-3xl font-bold text-green-600" aria-label={`${stats.branches} branches available`}>
+                        {stats.branches}
                       </div>
                       <div className="text-sm font-medium text-green-800 mt-1">Branches</div>
                     </div>
                     <div className="bg-purple-50 p-5 rounded-lg border border-purple-100 hover:shadow-sm transition-shadow">
-                      <div className="text-3xl font-bold text-purple-600" aria-label={`${new Set(papers.map(p => p.year)).size} years available`}>
-                        {new Set(papers.map(p => p.year)).size}
+                      <div className="text-3xl font-bold text-purple-600" aria-label={`${stats.years} years available`}>
+                        {stats.years}
                       </div>
                       <div className="text-sm font-medium text-purple-800 mt-1">Years</div>
                     </div>
                   </div>
                   
-                  <PaperFilter papers={papers} onFilterChangeAction={handleFilterChange} />
+                  <PaperFilter />
                 </div>
               )}
             </CardContent>

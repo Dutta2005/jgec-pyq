@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import logo from '@/public/jgec.png';
 import { useAuth } from '@/hooks/useAuth';
 import Image from 'next/image';
+import Link from 'next/link';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -59,8 +60,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <h1 className="text-lg font-semibold text-gray-900 hidden md:block">Question paper Admin</h1>
             </div>
             <div className="flex items-center gap-4">
-              <Button variant="outline" onClick={() => router.push('/')}>
-                View Public Site
+              <Button variant="outline">
+                <Link href="/">
+                  View Public Site
+                </Link>
               </Button>
               <Button variant="outline" onClick={handleLogout}>
                 <LogOut className="h-4 w-4 mr-2" />
@@ -70,7 +73,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </div>
         </div>
       </header>
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}
       </main>

@@ -10,6 +10,10 @@ export async function GET(request: NextRequest) {
     const branch = searchParams.get('branch') || '';
     const type = searchParams.get('type') || '';
 
+    // if (!query && !year && !branch && !type) {
+    //   return NextResponse.json([]);
+    // }
+
     const whereClause: Prisma.QuestionPaperWhereInput = {};
 
     if (query.trim()) {

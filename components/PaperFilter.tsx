@@ -10,12 +10,7 @@ import { branches, questionTypes, years, semesters } from '@/lib/utils';
 import { QuestionPaper } from '@/types';
 import { toast } from 'sonner';
 
-interface PaperFilterProps {
-  papers: QuestionPaper[];
-  onFilterChangeAction: (filteredPapers: QuestionPaper[]) => void;
-}
-
-export default function PaperFilter({ papers, onFilterChangeAction }: PaperFilterProps) {
+export default function PaperFilter() {
   const [filters, setFilters] = useState({
     year: '',
     branch: '',
@@ -25,71 +20,84 @@ export default function PaperFilter({ papers, onFilterChangeAction }: PaperFilte
 
   const [filteredPapers, setFilteredPapers] = useState<QuestionPaper[]>([]);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [isFetching, setIsFetching] = useState(false);
 
+  const fetchFilteredPapers = async (currentFilters: typeof filters) => {
+    if (!currentFilters.year && !currentFilters.branch && !currentFilters.semester && !currentFilters.questionType) {
+      setFilteredPapers([]);
+      return;
+    }
+
+    setIsFetching(true);
+    try {
+      const params = new URLSearchParams();
+      if (currentFilters.year) params.append('year', currentFilters.year);
+      if (currentFilters.branch) params.append('branch', currentFilters.branch);
+      if (currentFilters.semester) params.append('semester', currentFilters.semester);
+      if (currentFilters.questionType) params.append('questionType', currentFilters.questionType);
+
+      const response = await fetch(`/api/papers?${params.toString()}`);
+      if (response.ok) {
+        const data = await response.json();
+        setFilteredPapers(data);
+      } else {
+        toast.error('Failed to fetch papers');
+        setFilteredPapers([]);
+      }
+    } catch (error) {
+      console.error('Fetch error:', error);
+      toast.error('Error fetching papers');
+      setFilteredPapers([]);
+    } finally {
+      setIsFetching(false);
+    }
+  };
   const handleFilterChange = (key: string, value: string) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
-
-    // Apply filters
-    let filtered = papers;
-
-    if (newFilters.year) {
-      filtered = filtered.filter(paper => paper.year.toString() === newFilters.year);
-    }
-    if (newFilters.branch) {
-      filtered = filtered.filter(paper => paper.branch === newFilters.branch);
-    }
-    if (newFilters.semester) {
-      filtered = filtered.filter(paper => paper.semester.toString() === newFilters.semester);
-    }
-    if (newFilters.questionType) {
-      filtered = filtered.filter(paper => paper.questionType === newFilters.questionType);
-    }
-
-    setFilteredPapers(filtered);
-    onFilterChangeAction(filtered);
+    fetchFilteredPapers(newFilters);
   };
 
   const clearFilters = () => {
-    setFilters({
+    const newFilters = {
       year: '',
       branch: '',
       semester: '',
       questionType: '',
-    });
+    };
+    setFilters(newFilters);
     setFilteredPapers([]);
-    onFilterChangeAction(papers);
   };
 
   const handleDownload = async (paper: QuestionPaper) => {
     setDownloadingId(paper.id);
     toast.loading('Downloading...', { id: `download-${paper.id}` });
-    
+
     try {
       // Fetch the file as a blob
       const response = await fetch(paper.fileUrl);
-      
+
       if (!response.ok) {
         throw new Error('File not accessible');
       }
 
       // Get the blob data
       const blob = await response.blob();
-      
+
       // Create a blob URL and trigger download
       const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = blobUrl;
       link.download = `${paper.title}.pdf`;
-      
+
       // Add to DOM, click, then remove
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       // Clean up the blob URL
       URL.revokeObjectURL(blobUrl);
-      
+
       toast.success('Download completed', { id: `download-${paper.id}` });
     } catch (error) {
       console.error('Download error:', error);
@@ -111,7 +119,7 @@ export default function PaperFilter({ papers, onFilterChangeAction }: PaperFilte
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <div>
             <Select value={filters.year} onValueChange={(value) => handleFilterChange('year', value)}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select year" />
               </SelectTrigger>
               <SelectContent>
@@ -126,7 +134,7 @@ export default function PaperFilter({ papers, onFilterChangeAction }: PaperFilte
 
           <div>
             <Select value={filters.branch} onValueChange={(value) => handleFilterChange('branch', value)}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select branch" />
               </SelectTrigger>
               <SelectContent>
@@ -141,7 +149,7 @@ export default function PaperFilter({ papers, onFilterChangeAction }: PaperFilte
 
           <div>
             <Select value={filters.semester} onValueChange={(value) => handleFilterChange('semester', value)}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select semester" />
               </SelectTrigger>
               <SelectContent>
@@ -156,7 +164,7 @@ export default function PaperFilter({ papers, onFilterChangeAction }: PaperFilte
 
           <div>
             <Select value={filters.questionType} onValueChange={(value) => handleFilterChange('questionType', value)}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>
@@ -179,7 +187,7 @@ export default function PaperFilter({ papers, onFilterChangeAction }: PaperFilte
         {filteredPapers.length > 0 ? (
           <div className="space-y-2">
             <h3 className="font-semibold text-lg text-gray-900">
-              Available Papers 
+              Available Papers
               <span className="ml-2 px-2.5 py-0.5 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
                 {filteredPapers.length}
               </span>
@@ -202,9 +210,9 @@ export default function PaperFilter({ papers, onFilterChangeAction }: PaperFilte
                     </p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
+                    <Button
+                      size="sm"
+                      variant="outline"
                       asChild
                       aria-label={`View ${paper.title}`}
                     >
@@ -215,8 +223,8 @@ export default function PaperFilter({ papers, onFilterChangeAction }: PaperFilte
                         </>
                       </Link>
                     </Button>
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       onClick={() => handleDownload(paper)}
                       disabled={downloadingId === paper.id}
                       aria-label={`Download ${paper.title}`}
@@ -233,9 +241,18 @@ export default function PaperFilter({ papers, onFilterChangeAction }: PaperFilte
           </div>
         ) : (
           <div className="text-center py-8 text-gray-500">
-            <Filter className="h-12 w-12 mx-auto mb-3 text-gray-400" />
-            <p className="text-sm font-medium">No papers match your filters</p>
-            <p className="text-xs mt-1">Try adjusting your filter criteria</p>
+            {isFetching ? (
+              <div className="flex flex-col items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-3"></div>
+                <p className="text-sm font-medium">Searching papers...</p>
+              </div>
+            ) : (
+              <>
+                <Filter className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                <p className="text-sm font-medium">No papers match your filters</p>
+                <p className="text-xs mt-1">Try adjusting your filter criteria to view papers</p>
+              </>
+            )}
           </div>
         )}
       </CardContent>
