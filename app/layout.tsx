@@ -83,10 +83,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: BASE_URL,
   },
-  // TODO: Add your Google Search Console verification code here
-  // verification: {
-  //   google: 'your-google-site-verification-code',
-  // },
+  verification: {
+    google: 'google-site-verification=DA4aL9GWqqwiWmo6FoGZLsNKUYKqsqbFxT1FiJHjmKI',
+  },
 };
 
 export default function RootLayout({
