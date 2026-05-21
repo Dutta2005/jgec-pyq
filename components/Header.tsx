@@ -27,9 +27,9 @@ function Header() {
               height={50}
               className="flex-shrink-0"
             />
-            <h1 className="text-xl font-bold hidden md:block text-gray-900">
+            <span className="text-xl font-bold hidden md:block text-gray-900">
               JGEC Question Papers
-            </h1>
+            </span>
           </Link>
           <nav className="flex items-center gap-2 sm:gap-3" aria-label="Main navigation">
             <Button
