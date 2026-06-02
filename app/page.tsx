@@ -1,11 +1,13 @@
-import dynamic from 'next/dynamic';
+import nextDynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, BookOpen, GraduationCap, Building2 } from 'lucide-react';
 import { prisma } from '@/lib/db';
 import Header from '@/components/Header';
 import { HomePageJsonLd } from '@/components/JsonLd';
 
-const PaperFilter = dynamic(() => import('@/components/PaperFilter'), {
+export const dynamic = 'force-dynamic';
+
+const PaperFilter = nextDynamic(() => import('@/components/PaperFilter'), {
   loading: () => (
     <div className="flex flex-col items-center justify-center p-12 space-y-4">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -115,7 +117,7 @@ export default async function HomePage() {
                       <div className="text-sm font-medium text-purple-800 mt-1">Years</div>
                     </div>
                   </div>
-                  
+
                   <PaperFilter />
                 </div>
               )}
@@ -123,7 +125,46 @@ export default async function HomePage() {
           </Card>
         </section>
 
-        {/* SEO Content Section — keyword-rich, visible to crawlers */}
+        <div className="mt-8 bg-white rounded-2xl p-6 sm:p-8 shadow-lg text-gray-900 flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="flex items-start gap-4">
+            <div className="bg-blue-600 rounded-full p-3 shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-lg sm:text-xl font-bold mb-1 text-gray-900">Help Us Grow the PYQ Collection</h2>
+              <p className="text-gray-700 text-sm sm:text-base leading-relaxed max-w-xl">
+                Have a question paper that&apos;s not listed here? You can upload it and help your fellow JGEC students.
+                Every single paper you share makes a real difference — your small effort goes a long way for hundreds of students.
+              </p>
+            </div>
+          </div>
+          <a
+            href="https://docs.google.com/forms/d/e/1FAIpQLSe4Bhsh5KipUv9fcVO22a5-JqOD00gb1bm7xKN7QVovGnKPfw/viewform"
+            target="_blank"
+            rel="noopener noreferrer"
+            id="contribute-button"
+            className="shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-full bg-blue-600 text-white font-semibold text-sm sm:text-base shadow-md hover:bg-blue-400 hover:shadow-lg active:scale-95 transition-all duration-200"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path d="M12 2C12 2 12.8 6.5 14.5 8.5C16.2 10.5 20 12 20 12C20 12 16.2 13.5 14.5 15.5C12.8 17.5 12 22 12 22C12 22 11.2 17.5 9.5 15.5C7.8 13.5 4 12 4 12C4 12 7.8 10.5 9.5 8.5C11.2 6.5 12 2 12 2Z" />
+              <path d="M19 2C19 2 19.4 4 20.2 4.8C21 5.6 23 6 23 6C23 6 21 6.4 20.2 7.2C19.4 8 19 10 19 10C19 10 18.6 8 17.8 7.2C17 6.4 15 6 15 6C15 6 17 5.6 17.8 4.8C18.6 4 19 2 19 2Z" />
+              <path d="M5 14C5 14 5.3 15.5 5.9 16.1C6.5 16.7 8 17 8 17C8 17 6.5 17.3 5.9 17.9C5.3 18.5 5 20 5 20C5 20 4.7 18.5 4.1 17.9C3.5 17.3 2 17 2 17C2 17 3.5 16.7 4.1 16.1C4.7 15.5 5 14 5 14Z" />
+            </svg>
+            Contribute Here
+          </a>
+        </div>
+
         <section className="mt-12 space-y-8" aria-labelledby="about-section">
           <div className="bg-white/70 backdrop-blur-sm rounded-xl p-6 sm:p-8 shadow-sm border">
             <h2 id="about-section" className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
